@@ -1,0 +1,74 @@
+---
+title: 3 Pointer Changed NBA Pay
+format: html
+---
+# project summary 
+Over the years, the NBA shifted mostly toward perimeter play and three point shooting, This project looks at how player pay changed alongside that on court transformation between 2010 and 2025. I took data from the 2024 season, high-volume three-point shooters (players taking 4 or more 3 point attempts per game) earned significantly higher average salaries than non shooters or players that didnt shoot 4 plus a game. Overall, the data confirms that modern contract values closely track perimeter shooting volume, reflecting the league's priority on how important a shooter is for a team , and you will have to pay a high price to get and retain one. 
+
+```{python}
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# Load dataset
+nba_data = pd.read_csv("~/Downloads/nbasal_data.csv")
+
+# Display dimensions and basic info
+print(f"Dataset Dimensions: {nba_data.shape[0]} rows, {nba_data.shape[1]} columns")
+nba_data[['Player', 'Year', 'Pos', 'PTS', '3PA', '3P%', 'Salary']].head()
+```
+
+```{python}
+# Group by year to see league averages
+yearly_trends = nba_data.groupby('Year')[['3PA', 'Salary']].mean().reset_index()
+
+# Plot 3 point attempt trend over time
+plt.figure(figsize=(9, 4.5))
+plt.plot(yearly_trends['Year'], yearly_trends['3PA'], marker='o', color='red', linewidth=2)
+plt.title("League Average Three-Point Attempts Per Game (2010–2025)", fontsize=13, fontweight='bold')
+plt.xlabel("Season Year")
+plt.ylabel("Average 3PA Per Game")
+plt.grid(True, linestyle='--', alpha=0.6)
+plt.show()
+```
+
+```{python}
+# Filter for 2024 season
+df_2024 = nba_data[nba_data['Year'] == 2024][['Player', 'Pos', 'PTS', '3PA', '3P%', 'TRB', 'AST', 'Salary']].copy()
+
+df_2024.head()
+```
+
+```{python}
+# Scatter plot of 3 point attempts vs salary in millions
+plt.scatter(df_2024['3PA'], df_2024['Salary'] / 1000000, alpha=0.6)
+plt.title("3-Point Attempts per Game vs. Salary (2024)")
+plt.xlabel("3-Point Attempts Per Game (3PA)")
+plt.ylabel("Salary ($ Millions)")
+plt.show()
+```
+
+```{python}
+# 1. Create flag for high-volume 3 point shooters (4 attempts or more per game)
+df_2024['High_Volume_3P'] = (df_2024['3PA'] >= 4.0).astype(int)
+
+# 2. Convert salary to millions 
+df_2024['Salary_Millions'] = df_2024['Salary'] / 1000000
+
+df_2024[['Player', '3PA', 'High_Volume_3P', 'Salary_Millions']].head()
+```
+
+```{python}
+# Group mean calculation
+salary_model = df_2024.groupby('High_Volume_3P')['Salary_Millions'].mean()
+
+print("Average Salary ($ Millions):")
+print(salary_model)
+
+# Plot comparison
+salary_model.plot(kind='bar', color=['grey', 'green'])
+plt.title("Average Salary: Low vs. High Volume 3P Shooters (2024)")
+plt.xlabel("High-Volume 3P Status (0 = Under 4 3PA, 1 = 4.0+ 3PA)")
+plt.ylabel("Mean Salary ($ Millions)")
+plt.xticks(ticks=[0, 1], labels=["< 4.0 3PA", ">= 4.0 3PA"], rotation=0)
+plt.show()
+```

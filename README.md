@@ -1,0 +1,1 @@
+This project analyzes the impact of 3-point volume and accuracy on NBA player salaries. Using Python to evaluate shooting statistics and contract data, it examines how modern teams value perimeter shooting and quantifies the financial return on high-volume 3-point performance.
